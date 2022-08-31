@@ -1,7 +1,10 @@
 package com.eganin.jetpack.thebest.stockmarket.data.repository
 
+import com.eganin.jetpack.thebest.stockmarket.data.csv.CSVParser
+import com.eganin.jetpack.thebest.stockmarket.data.csv.CompanyListingsParser
 import com.eganin.jetpack.thebest.stockmarket.data.local.StockDatabase
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListing
+import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListingEntity
 import com.eganin.jetpack.thebest.stockmarket.data.remote.StockApi
 import com.eganin.jetpack.thebest.stockmarket.domain.model.CompanyListing
 import com.eganin.jetpack.thebest.stockmarket.domain.repository.StockRepository
@@ -15,8 +18,9 @@ import javax.inject.Singleton
 
 @Singleton
 class StockRepositoryImpl @Inject constructor(
-    val api: StockApi,
-    val db: StockDatabase,
+    private val api: StockApi,
+    private val companyListingsParser: CSVParser<CompanyListing>,
+    db: StockDatabase,
 ) : StockRepository {
 
     private val dao = db.dao
@@ -41,13 +45,24 @@ class StockRepositoryImpl @Inject constructor(
 
             val remoteListings = try {
                 val response = api.getListings()
-                response.byteStream()
-            }catch (e : IOException){
+                companyListingsParser.parse(stream = response.byteStream())
+            } catch (e: IOException) {
                 e.printStackTrace()
                 emit(Resource.Error("Couldn't load data"))
-            }catch (e : HttpException){
+                null
+            } catch (e: HttpException) {
                 e.printStackTrace()
                 emit(Resource.Error("Couldn't load data"))
+                null
+            }
+
+            remoteListings?.let { listings ->
+                emit(Resource.Success(listings))
+                emit(Resource.Loading(isLoading = false))
+                dao.clearCompanyListings()
+                dao.insertCompanyListings(companyListingEntities = listings.map {
+                    it.toCompanyListingEntity()
+                })
             }
         }
     }
