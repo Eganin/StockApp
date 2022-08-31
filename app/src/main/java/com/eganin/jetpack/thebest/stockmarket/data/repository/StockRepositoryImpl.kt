@@ -1,7 +1,6 @@
 package com.eganin.jetpack.thebest.stockmarket.data.repository
 
 import com.eganin.jetpack.thebest.stockmarket.data.csv.CSVParser
-import com.eganin.jetpack.thebest.stockmarket.data.csv.CompanyListingsParser
 import com.eganin.jetpack.thebest.stockmarket.data.local.StockDatabase
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListing
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListingEntity
@@ -57,12 +56,16 @@ class StockRepositoryImpl @Inject constructor(
             }
 
             remoteListings?.let { listings ->
-                emit(Resource.Success(listings))
-                emit(Resource.Loading(isLoading = false))
                 dao.clearCompanyListings()
                 dao.insertCompanyListings(companyListingEntities = listings.map {
                     it.toCompanyListingEntity()
                 })
+                emit(Resource.Success(
+                    data = dao
+                        .searchCompanyListing(query = "")
+                        .map { it.toCompanyListing() }
+                ))
+                emit(Resource.Loading(isLoading = false))
             }
         }
     }
