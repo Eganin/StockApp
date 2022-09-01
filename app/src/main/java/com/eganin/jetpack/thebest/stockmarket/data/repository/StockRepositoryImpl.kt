@@ -5,7 +5,9 @@ import com.eganin.jetpack.thebest.stockmarket.data.local.StockDatabase
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListing
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListingEntity
 import com.eganin.jetpack.thebest.stockmarket.data.remote.StockApi
+import com.eganin.jetpack.thebest.stockmarket.domain.model.CompanyInfo
 import com.eganin.jetpack.thebest.stockmarket.domain.model.CompanyListing
+import com.eganin.jetpack.thebest.stockmarket.domain.model.IntradayInfo
 import com.eganin.jetpack.thebest.stockmarket.domain.repository.StockRepository
 import com.eganin.jetpack.thebest.stockmarket.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -47,11 +49,11 @@ class StockRepositoryImpl @Inject constructor(
                 companyListingsParser.parse(stream = response.byteStream())
             } catch (e: IOException) {
                 e.printStackTrace()
-                emit(Resource.Error("Couldn't load data"))
+                emit(Resource.Error(message = "Couldn't load data"))
                 null
             } catch (e: HttpException) {
                 e.printStackTrace()
-                emit(Resource.Error("Couldn't load data"))
+                emit(Resource.Error(message = "Couldn't load data"))
                 null
             }
 
@@ -67,6 +69,31 @@ class StockRepositoryImpl @Inject constructor(
                 ))
                 emit(Resource.Loading(isLoading = false))
             }
+        }
+    }
+
+    override suspend fun getIntradayInfo(symbol: String): Resource<List<IntradayInfo>> {
+        return try {
+            val response = api.getInstradayInfo(symbol=symbol)
+
+        }catch (e : IOException){
+            e.printStackTrace()
+            Resource.Error(message = "Couldn't load intraday info")
+        }catch (e : HttpException){
+            e.printStackTrace()
+            Resource.Error(message = "Couldn't load intraday info")
+        }
+    }
+
+    override suspend fun getCompanyInfo(symbol: String): Resource<CompanyInfo> {
+        return try {
+
+        }catch (e : IOException){
+            e.printStackTrace()
+            Resource.Error(message = "Couldn't load intraday info")
+        }catch (e : HttpException){
+            e.printStackTrace()
+            Resource.Error(message = "Couldn't load intraday info")
         }
     }
 }
