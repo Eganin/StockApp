@@ -27,7 +27,7 @@ fun CompanyInfoScreen(
     viewModel: CompanyInfoViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-    if (state.error == null) {
+    if(state.error == null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -50,9 +50,10 @@ fun CompanyInfoScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
-                Divider(modifier = Modifier.fillMaxWidth())
-
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Industry: ${company.industry}",
@@ -68,19 +69,20 @@ fun CompanyInfoScreen(
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
-                Divider(modifier = Modifier.fillMaxWidth())
-
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = company.description,
                     fontSize = 12.sp,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                if (state.stockInfo.isNotEmpty()) {
+                if(state.stockInfo.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Market Summary")
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
                     StockChart(
                         info = state.stockInfo,
                         modifier = Modifier
@@ -96,9 +98,9 @@ fun CompanyInfoScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Center
     ) {
-        if (state.isLoading) {
+        if(state.isLoading) {
             CircularProgressIndicator()
-        } else if (state.error != null) {
+        } else if(state.error != null) {
             Text(
                 text = state.error,
                 color = MaterialTheme.colors.error

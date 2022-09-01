@@ -76,7 +76,7 @@ class StockRepositoryImpl @Inject constructor(
 
     override suspend fun getIntradayInfo(symbol: String): Resource<List<IntradayInfo>> {
         return try {
-            val response = api.getInstradayInfo(symbol = symbol)
+            val response = api.getIntradayInfo(symbol = symbol)
             val result = intradayInfoParser.parse(stream = response.byteStream())
             Resource.Success(result)
         } catch (e: IOException) {

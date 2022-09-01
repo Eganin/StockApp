@@ -1,5 +1,6 @@
 package com.eganin.jetpack.thebest.stockmarket.presentation.company_info
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -17,56 +18,49 @@ import javax.inject.Inject
 class CompanyInfoViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: StockRepository
-) : ViewModel() {
+): ViewModel() {
+
     var state by mutableStateOf(CompanyInfoState())
 
     init {
         viewModelScope.launch {
             val symbol = savedStateHandle.get<String>("symbol") ?: return@launch
             state = state.copy(isLoading = true)
-            val companyInfoResult = async { repository.getCompanyInfo(symbol = symbol) }
-            val intradayInfoResult = async { repository.getIntradayInfo(symbol = symbol) }
-
-            when (val result = companyInfoResult.await()) {
+            val companyInfoResult = async { repository.getCompanyInfo(symbol) }
+            val intradayInfoResult = async { repository.getIntradayInfo(symbol) }
+            when(val result = companyInfoResult.await()) {
                 is Resource.Success -> {
                     state = state.copy(
                         company = result.data,
                         isLoading = false,
-                        error = null,
+                        error = null
                     )
                 }
-
                 is Resource.Error -> {
                     state = state.copy(
                         isLoading = false,
                         error = result.message,
-                        company = null,
+                        company = null
                     )
                 }
-                is Resource.Loading -> {
-
-                }
+                else -> Unit
             }
-
-            when (val result = intradayInfoResult.await()) {
+            when(val result = intradayInfoResult.await()) {
                 is Resource.Success -> {
                     state = state.copy(
                         stockInfo = result.data ?: emptyList(),
                         isLoading = false,
-                        error = null,
+                        error = null
                     )
                 }
-
                 is Resource.Error -> {
                     state = state.copy(
                         isLoading = false,
                         error = result.message,
-                        company = null,
+                        company = null
                     )
                 }
-                is Resource.Loading -> {
-
-                }
+                else -> Unit
             }
         }
     }
