@@ -2,6 +2,7 @@ package com.eganin.jetpack.thebest.stockmarket.data.repository
 
 import com.eganin.jetpack.thebest.stockmarket.data.csv.CSVParser
 import com.eganin.jetpack.thebest.stockmarket.data.local.StockDatabase
+import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyInfo
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListing
 import com.eganin.jetpack.thebest.stockmarket.data.mapper.toCompanyListingEntity
 import com.eganin.jetpack.thebest.stockmarket.data.remote.StockApi
@@ -21,6 +22,7 @@ import javax.inject.Singleton
 class StockRepositoryImpl @Inject constructor(
     private val api: StockApi,
     private val companyListingsParser: CSVParser<CompanyListing>,
+    private val intradayInfoParser: CSVParser<IntradayInfo>,
     db: StockDatabase,
 ) : StockRepository {
 
@@ -74,12 +76,13 @@ class StockRepositoryImpl @Inject constructor(
 
     override suspend fun getIntradayInfo(symbol: String): Resource<List<IntradayInfo>> {
         return try {
-            val response = api.getInstradayInfo(symbol=symbol)
-
-        }catch (e : IOException){
+            val response = api.getInstradayInfo(symbol = symbol)
+            val result = intradayInfoParser.parse(stream = response.byteStream())
+            Resource.Success(result)
+        } catch (e: IOException) {
             e.printStackTrace()
             Resource.Error(message = "Couldn't load intraday info")
-        }catch (e : HttpException){
+        } catch (e: HttpException) {
             e.printStackTrace()
             Resource.Error(message = "Couldn't load intraday info")
         }
@@ -87,13 +90,14 @@ class StockRepositoryImpl @Inject constructor(
 
     override suspend fun getCompanyInfo(symbol: String): Resource<CompanyInfo> {
         return try {
-
-        }catch (e : IOException){
+            val result = api.getCompanyInfo(symbol=symbol)
+            Resource.Success(result.toCompanyInfo())
+        } catch (e: IOException) {
             e.printStackTrace()
-            Resource.Error(message = "Couldn't load intraday info")
-        }catch (e : HttpException){
+            Resource.Error(message = "Couldn't load company info")
+        } catch (e: HttpException) {
             e.printStackTrace()
-            Resource.Error(message = "Couldn't load intraday info")
+            Resource.Error(message = "Couldn't load company info")
         }
     }
 }
