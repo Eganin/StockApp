@@ -1,5 +1,6 @@
 package com.eganin.jetpack.thebest.stockmarket.data.csv
 
+import android.util.Log
 import com.eganin.jetpack.thebest.stockmarket.domain.model.CompanyListing
 import com.opencsv.CSVReader
 import kotlinx.coroutines.Dispatchers
